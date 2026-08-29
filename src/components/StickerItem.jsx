@@ -18,8 +18,6 @@ export default function StickerItem({
     defaultMfgDate = 'Jun 2026',
     defaultProductName = 'Angle Cock with Flange',
     defaultBatchPrefix = 'RPK06[AASK](02)',
-    logoUrl = '',
-    showLogo = false, // FALSE by default: Blank safe area for physical pre-printed logo
     barcodeType = 'QR', // 'QR' | 'CODE128' | 'NONE'
     showBarcodeText = true,
     padding = 2.2,
@@ -166,30 +164,12 @@ export default function StickerItem({
 
       {/* ========================================================
           3. BOTTOM SECTION: 
-             - LEFT: Completely clear blank space for physical pre-printed logo
-             - RIGHT: Crisp QR Code with alphanumeric hash code
+             - LEFT: Completely clear pure white space (Reserved for physical pre-printed logo)
+             - RIGHT: Code Standard (QR Code or Barcode) + Hash String
          ======================================================== */}
       <div className="flex items-end justify-between w-full pt-0.5 px-0.5 mt-auto">
-        {/* Bottom Left: If showLogo is enabled in designer, renders digital logo; otherwise 100% CLEAR BLANK SPACE for pre-printed paper */}
-        <div className="flex flex-col items-start shrink-0 min-w-[50px] min-h-[38px]">
-          {showLogo && logoUrl ? (
-            <img
-              src={logoUrl}
-              alt="RN Logo"
-              style={{
-                height: `${config.logoHeight || 13}mm`,
-                maxHeight: '14mm',
-              }}
-              className="w-auto object-contain"
-              onError={(e) => {
-                e.target.style.display = 'none';
-              }}
-            />
-          ) : (
-            /* Clear Reserved Safe Margin Box (Invisible placeholder for physical pre-printed logo) */
-            <div className="w-12 h-9" />
-          )}
-        </div>
+        {/* Bottom Left: 100% CLEAR BLANK SPACE for physical pre-printed RN logo */}
+        <div className="w-14 h-9 shrink-0" />
 
         {/* Bottom Right: QR Code & Alphanumeric Hash Code */}
         {barcodeType === 'QR' && (
