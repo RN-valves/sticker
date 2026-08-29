@@ -20,10 +20,10 @@ export default function StickerItem({
     defaultBatchPrefix = 'RPK06[AASK](02)',
     barcodeType = 'QR', // 'QR' | 'CODE128' | 'NONE'
     showBarcodeText = true,
-    paddingLeft = 6, // 6mm safe left margin to prevent left edge cutting
-    paddingRight = 4, // 4mm safe right margin
-    paddingTop = 3, // 3mm safe top margin
-    paddingBottom = 2.5, // 2.5mm safe bottom margin
+    paddingLeft = 14, // Generous 14mm left space to give ample breathing room & clear any edge/logo
+    paddingRight = 6, // 6mm right space
+    paddingTop = 3, // 3mm top space
+    paddingBottom = 2.5, // 2.5mm bottom space
     borderStyle = 'none',
     borderWidth = 0,
     borderColor = '#000000',
@@ -78,10 +78,10 @@ export default function StickerItem({
     }
   }, [qrData, barcodeType]);
 
-  const effPaddingLeft = config.paddingLeft !== undefined ? config.paddingLeft : (config.padding !== undefined ? config.padding + 3 : 6);
-  const effPaddingRight = config.paddingRight !== undefined ? config.paddingRight : (config.padding !== undefined ? config.padding : 4);
-  const effPaddingTop = config.paddingTop !== undefined ? config.paddingTop : (config.padding !== undefined ? config.padding : 3);
-  const effPaddingBottom = config.paddingBottom !== undefined ? config.paddingBottom : (config.padding !== undefined ? config.padding : 2.5);
+  const effPaddingLeft = config.paddingLeft !== undefined && config.paddingLeft >= 4 ? config.paddingLeft : 14;
+  const effPaddingRight = config.paddingRight !== undefined ? config.paddingRight : 6;
+  const effPaddingTop = config.paddingTop !== undefined ? config.paddingTop : 3;
+  const effPaddingBottom = config.paddingBottom !== undefined ? config.paddingBottom : 2.5;
 
   const containerStyle = {
     width: `${width}${unit}`,
@@ -107,9 +107,9 @@ export default function StickerItem({
       {/* ========================================================
           1. TOP 2-COLUMN SPECIFICATION GRID (WITH VERTICAL DIVIDER)
          ======================================================== */}
-      <div className="grid grid-cols-2 gap-x-2.5 w-full leading-tight text-[8pt] border-b border-black/10 pb-1">
+      <div className="grid grid-cols-2 gap-x-3 w-full leading-tight text-[8pt] border-b border-black/10 pb-1">
         {/* LEFT COLUMN */}
-        <div className="flex flex-col space-y-[1.5px] pr-2 border-r border-black/50">
+        <div className="flex flex-col space-y-[1.5px] pr-2.5 border-r border-black/50">
           {/* Collection Name */}
           <div className="font-extrabold text-black text-[8.5pt] tracking-tight truncate">
             {collectionName}
@@ -138,7 +138,7 @@ export default function StickerItem({
         </div>
 
         {/* RIGHT COLUMN */}
-        <div className="flex flex-col space-y-[1.5px] pl-1.5">
+        <div className="flex flex-col space-y-[1.5px] pl-2">
           {/* Article / Item Code */}
           <div className="flex items-baseline gap-1 text-[8.5pt] text-black">
             <span className="font-bold shrink-0">ART :</span>
