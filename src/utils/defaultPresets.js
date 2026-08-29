@@ -6,7 +6,7 @@ export const THERMAL_PRESETS = [
     width: 98,
     height: 44,
     unit: 'mm',
-    description: 'Exact RN Valves & Faucets product box sticker with QR code, 2-column specs, & RN logo',
+    description: 'Exact RN Valves & Faucets product box sticker (Pre-printed logo compatible, 0% overlap)',
     recommendedFor: 'Thermal Roll (Active)',
   },
   {
@@ -171,17 +171,17 @@ export const DEFAULT_CONFIG = {
   a4GapX: 0,
   a4GapY: 0,
 
-  // Branding & Logo for RN Valves & Faucets
+  // Branding & Logo: Set to FALSE by default because sticker paper has pre-printed physical logo!
   brandName: 'RN VALVES & FAUCETS',
-  showLogo: true,
-  logoUrl: '/logo.png',
-  logoHeight: 14, // mm height in bottom-left
+  showLogo: false,
+  logoUrl: '',
+  logoHeight: 13,
 
   // Barcode / QR Code
-  barcodeType: 'QR', // Default to QR Code matching official box sticker
+  barcodeType: 'QR',
   barcodeSource: 'skuCode',
   showBarcodeText: true,
-  qrSize: 42, // px
+  qrPosition: 'right', // 'right' | 'center'
 
   // Product Fields Visibility & Styling
   showArticleNumber: true,
@@ -210,10 +210,10 @@ export const DEFAULT_CONFIG = {
   showProductName: true,
 
   // Border & Padding
-  borderStyle: 'solid',
-  borderWidth: 1,
+  borderStyle: 'none', // 'none' for pre-printed thermal roll stickers or 'solid'
+  borderWidth: 0,
   borderColor: '#000000',
-  borderRadius: 4,
+  borderRadius: 0,
   padding: 2.2, // mm
   backgroundColor: '#ffffff',
   textColor: '#000000',

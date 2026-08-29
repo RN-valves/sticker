@@ -18,16 +18,15 @@ export default function StickerItem({
     defaultMfgDate = 'Jun 2026',
     defaultProductName = 'Angle Cock with Flange',
     defaultBatchPrefix = 'RPK06[AASK](02)',
-    logoUrl = '/logo.png',
-    showLogo = true,
-    logoHeight = 13, // in mm
+    logoUrl = '',
+    showLogo = false, // FALSE by default: Blank safe area for physical pre-printed logo
     barcodeType = 'QR', // 'QR' | 'CODE128' | 'NONE'
     showBarcodeText = true,
     padding = 2.2,
-    borderStyle = 'solid',
-    borderWidth = 1,
+    borderStyle = 'none',
+    borderWidth = 0,
     borderColor = '#000000',
-    borderRadius = 4,
+    borderRadius = 0,
   } = config;
 
   const qrCanvasRef = useRef(null);
@@ -160,23 +159,25 @@ export default function StickerItem({
           2. MIDDLE SECTION: CENTERED BOLD PRODUCT TITLE
          ======================================================== */}
       <div className="w-full text-center py-1 my-auto px-1">
-        <h4 className="text-[9.5pt] font-extrabold tracking-normal text-black font-sans leading-tight">
+        <h4 className="text-[10pt] font-extrabold tracking-normal text-black font-sans leading-tight">
           {productName}
         </h4>
       </div>
 
       {/* ========================================================
-          3. BOTTOM SECTION: RN LOGO (LEFT) & QR CODE WITH HASH (RIGHT)
+          3. BOTTOM SECTION: 
+             - LEFT: Completely clear blank space for physical pre-printed logo
+             - RIGHT: Crisp QR Code with alphanumeric hash code
          ======================================================== */}
       <div className="flex items-end justify-between w-full pt-0.5 px-0.5 mt-auto">
-        {/* Bottom Left: Official RN Valves Logo */}
-        {showLogo && (
-          <div className="flex flex-col items-start shrink-0">
+        {/* Bottom Left: If showLogo is enabled in designer, renders digital logo; otherwise 100% CLEAR BLANK SPACE for pre-printed paper */}
+        <div className="flex flex-col items-start shrink-0 min-w-[50px] min-h-[38px]">
+          {showLogo && logoUrl ? (
             <img
-              src={logoUrl || '/logo.png'}
-              alt="RN Valves & Faucets"
+              src={logoUrl}
+              alt="RN Logo"
               style={{
-                height: `${logoHeight || 13}mm`,
+                height: `${config.logoHeight || 13}mm`,
                 maxHeight: '14mm',
               }}
               className="w-auto object-contain"
@@ -184,8 +185,11 @@ export default function StickerItem({
                 e.target.style.display = 'none';
               }}
             />
-          </div>
-        )}
+          ) : (
+            /* Clear Reserved Safe Margin Box (Invisible placeholder for physical pre-printed logo) */
+            <div className="w-12 h-9" />
+          )}
+        </div>
 
         {/* Bottom Right: QR Code & Alphanumeric Hash Code */}
         {barcodeType === 'QR' && (
