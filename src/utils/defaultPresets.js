@@ -6,7 +6,7 @@ export const THERMAL_PRESETS = [
     width: 98,
     height: 44,
     unit: 'mm',
-    description: 'Exact RN Valves & Faucets product box sticker (Pre-printed logo compatible, 0% overlap)',
+    description: 'Exact RN Valves & Faucets product box sticker with safe left padding for thermal printers',
     recommendedFor: 'Thermal Roll (Active)',
   },
   {
@@ -156,6 +156,12 @@ export const DEFAULT_CONFIG = {
   unit: 'mm',
   layoutType: 'thermal', // 'thermal' | 'a4'
 
+  // Safe Margins / Padding (Generous Left Padding to prevent left edge cutting!)
+  paddingLeft: 6, // 6mm safe left margin
+  paddingRight: 4, // 4mm safe right margin
+  paddingTop: 3, // 3mm safe top margin
+  paddingBottom: 2.5, // 2.5mm safe bottom margin
+
   // Default Global Fallbacks
   defaultCollection: 'G20 Collection',
   defaultFinish: 'Marble',
@@ -171,17 +177,15 @@ export const DEFAULT_CONFIG = {
   a4GapX: 0,
   a4GapY: 0,
 
-  // Branding & Logo: Set to FALSE by default because sticker paper has pre-printed physical logo!
+  // Branding & Logo
   brandName: 'RN VALVES & FAUCETS',
   showLogo: false,
   logoUrl: '',
-  logoHeight: 13,
 
   // Barcode / QR Code
   barcodeType: 'QR',
   barcodeSource: 'skuCode',
   showBarcodeText: true,
-  qrPosition: 'right', // 'right' | 'center'
 
   // Product Fields Visibility & Styling
   showArticleNumber: true,
@@ -210,11 +214,10 @@ export const DEFAULT_CONFIG = {
   showProductName: true,
 
   // Border & Padding
-  borderStyle: 'none', // 'none' for pre-printed thermal roll stickers or 'solid'
+  borderStyle: 'none',
   borderWidth: 0,
   borderColor: '#000000',
   borderRadius: 0,
-  padding: 2.2, // mm
   backgroundColor: '#ffffff',
   textColor: '#000000',
 

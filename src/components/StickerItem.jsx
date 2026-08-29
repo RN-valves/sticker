@@ -20,7 +20,10 @@ export default function StickerItem({
     defaultBatchPrefix = 'RPK06[AASK](02)',
     barcodeType = 'QR', // 'QR' | 'CODE128' | 'NONE'
     showBarcodeText = true,
-    padding = 2.2,
+    paddingLeft = 6, // 6mm safe left margin to prevent left edge cutting
+    paddingRight = 4, // 4mm safe right margin
+    paddingTop = 3, // 3mm safe top margin
+    paddingBottom = 2.5, // 2.5mm safe bottom margin
     borderStyle = 'none',
     borderWidth = 0,
     borderColor = '#000000',
@@ -75,12 +78,20 @@ export default function StickerItem({
     }
   }, [qrData, barcodeType]);
 
+  const effPaddingLeft = config.paddingLeft !== undefined ? config.paddingLeft : (config.padding !== undefined ? config.padding + 3 : 6);
+  const effPaddingRight = config.paddingRight !== undefined ? config.paddingRight : (config.padding !== undefined ? config.padding : 4);
+  const effPaddingTop = config.paddingTop !== undefined ? config.paddingTop : (config.padding !== undefined ? config.padding : 3);
+  const effPaddingBottom = config.paddingBottom !== undefined ? config.paddingBottom : (config.padding !== undefined ? config.padding : 2.5);
+
   const containerStyle = {
     width: `${width}${unit}`,
     height: `${height}${unit}`,
     backgroundColor: '#ffffff',
     color: '#000000',
-    padding: `${padding}${unit}`,
+    paddingTop: `${effPaddingTop}${unit}`,
+    paddingBottom: `${effPaddingBottom}${unit}`,
+    paddingLeft: `${effPaddingLeft}${unit}`,
+    paddingRight: `${effPaddingRight}${unit}`,
     border: borderStyle === 'none' ? 'none' : `${borderWidth}px ${borderStyle} ${borderColor}`,
     borderRadius: `${borderRadius}px`,
     boxSizing: 'border-box',
@@ -96,7 +107,7 @@ export default function StickerItem({
       {/* ========================================================
           1. TOP 2-COLUMN SPECIFICATION GRID (WITH VERTICAL DIVIDER)
          ======================================================== */}
-      <div className="grid grid-cols-2 gap-x-2 w-full leading-tight text-[8pt] border-b border-black/10 pb-1">
+      <div className="grid grid-cols-2 gap-x-2.5 w-full leading-tight text-[8pt] border-b border-black/10 pb-1">
         {/* LEFT COLUMN */}
         <div className="flex flex-col space-y-[1.5px] pr-2 border-r border-black/50">
           {/* Collection Name */}
@@ -127,7 +138,7 @@ export default function StickerItem({
         </div>
 
         {/* RIGHT COLUMN */}
-        <div className="flex flex-col space-y-[1.5px] pl-1">
+        <div className="flex flex-col space-y-[1.5px] pl-1.5">
           {/* Article / Item Code */}
           <div className="flex items-baseline gap-1 text-[8.5pt] text-black">
             <span className="font-bold shrink-0">ART :</span>
@@ -156,7 +167,7 @@ export default function StickerItem({
       {/* ========================================================
           2. MIDDLE SECTION: CENTERED BOLD PRODUCT TITLE
          ======================================================== */}
-      <div className="w-full text-center py-1 my-auto px-1">
+      <div className="w-full text-center py-1.5 my-auto px-1">
         <h4 className="text-[10pt] font-extrabold tracking-normal text-black font-sans leading-tight">
           {productName}
         </h4>
@@ -173,7 +184,7 @@ export default function StickerItem({
 
         {/* Bottom Right: QR Code & Alphanumeric Hash Code */}
         {barcodeType === 'QR' && (
-          <div className="flex flex-col items-center shrink-0">
+          <div className="flex flex-col items-center shrink-0 pr-1">
             <canvas ref={qrCanvasRef} className="block" />
             {showBarcodeText && (
               <span className="font-mono text-[6pt] text-black font-bold tracking-tighter mt-0.5 leading-none">
@@ -185,7 +196,7 @@ export default function StickerItem({
 
         {/* Fallback to 1D Barcode if selected */}
         {barcodeType === 'CODE128' && (
-          <div className="flex flex-col items-center shrink-0">
+          <div className="flex flex-col items-center shrink-0 pr-1">
             <svg ref={barcodeSvgRef} className="max-w-[120px]" />
             {showBarcodeText && (
               <span className="font-mono text-[6pt] text-black font-bold tracking-tight">

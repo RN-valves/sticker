@@ -17,6 +17,7 @@ import {
   QrCode,
   Calendar,
   Box,
+  MoveHorizontal,
 } from 'lucide-react';
 import { THERMAL_PRESETS, NORMAL_A4_PRESETS } from '../utils/defaultPresets';
 
@@ -72,7 +73,7 @@ export default function StickerDesigner({
         </button>
       </div>
 
-      {/* Printer Mode Switcher (Thermal vs Normal A4) */}
+      {/* Printer Mode Switcher */}
       <div className="space-y-1.5">
         <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
           <span>Choose Your Printer Mode</span>
@@ -132,7 +133,7 @@ export default function StickerDesigner({
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="font-bold text-white text-xs">
-              Exact RN Box Sticker (98mm × 44mm)
+              98mm × 44mm (Safe Margin Active)
             </span>
           </div>
           <span className="text-[10px] bg-sky-500 text-white font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -140,11 +141,66 @@ export default function StickerDesigner({
           </span>
         </div>
         <p className="text-[11px] text-slate-400 mt-1">
-          2-Column Spec Grid (Top) + Product Name (Center) + RN Logo & QR Code (Bottom)
+          Content centered with 6mm safe left margin to prevent printer cutting!
         </p>
       </div>
 
-      {/* Default Global Values (Series, Finish, MFG Date, Product Title) */}
+      {/* Left Margin / Padding Controls (Crucial for fixing edge cutting) */}
+      <div className="space-y-3 pt-2 border-t border-slate-800">
+        <div className="flex items-center justify-between">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+            <MoveHorizontal className="w-3.5 h-3.5 text-amber-400" />
+            <span>Left Margin / Safe Padding (Prevents Cutting)</span>
+          </label>
+          <span className="text-[10px] font-mono text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
+            {config.paddingLeft !== undefined ? config.paddingLeft : 6}mm
+          </span>
+        </div>
+
+        <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-slate-400 font-semibold">Shift Content Right:</span>
+            <div className="flex items-center gap-1">
+              {[
+                { label: '4mm', val: 4 },
+                { label: '6mm (Safe)', val: 6 },
+                { label: '8mm', val: 8 },
+                { label: '10mm (Wide)', val: 10 },
+              ].map((p) => (
+                <button
+                  key={p.val}
+                  type="button"
+                  onClick={() => updateField('paddingLeft', p.val)}
+                  className={`px-2.5 py-1 rounded text-[10px] font-bold transition-all ${
+                    (config.paddingLeft !== undefined ? config.paddingLeft : 6) === p.val
+                      ? 'bg-amber-500 text-slate-950 shadow-md font-black'
+                      : 'bg-slate-800 text-slate-300 hover:text-white'
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Slider */}
+          <div className="flex items-center gap-2 pt-1">
+            <span className="text-[10px] text-slate-400">2mm</span>
+            <input
+              type="range"
+              min="2"
+              max="15"
+              step="0.5"
+              value={config.paddingLeft !== undefined ? config.paddingLeft : 6}
+              onChange={(e) => updateField('paddingLeft', parseFloat(e.target.value) || 6)}
+              className="w-full accent-amber-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+            />
+            <span className="text-[10px] text-slate-400">15mm</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Default Global Values */}
       <div className="space-y-3 pt-2 border-t border-slate-800">
         <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
           <Box className="w-3.5 h-3.5 text-sky-400" />
@@ -153,7 +209,7 @@ export default function StickerDesigner({
 
         <div className="grid grid-cols-2 gap-2.5 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
           <div>
-            <span className="text-[10px] text-slate-400 block mb-1">Default Collection Name</span>
+            <span className="text-[10px] text-slate-400 block mb-1">Default Collection</span>
             <input
               type="text"
               value={config.defaultCollection || 'G20 Collection'}
@@ -163,7 +219,7 @@ export default function StickerDesigner({
           </div>
 
           <div>
-            <span className="text-[10px] text-slate-400 block mb-1">Default Finish / Material</span>
+            <span className="text-[10px] text-slate-400 block mb-1">Default Finish</span>
             <input
               type="text"
               value={config.defaultFinish || 'Marble'}
@@ -224,40 +280,6 @@ export default function StickerDesigner({
           >
             Code128 Barcode
           </button>
-        </div>
-      </div>
-
-      {/* Logo Customizer */}
-      <div className="space-y-3 pt-2 border-t border-slate-800">
-        <div className="flex items-center justify-between">
-          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <Image className="w-3.5 h-3.5 text-sky-400" />
-            <span>RN Valves Logo (Bottom-Left)</span>
-          </label>
-          <span className="text-[10px] font-mono text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20">
-            {config.logoHeight || 13}mm Height
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {[
-            { label: 'Standard (12mm)', size: 12 },
-            { label: 'Medium (13mm)', size: 13 },
-            { label: 'Large (14mm)', size: 14 },
-          ].map((sz) => (
-            <button
-              key={sz.size}
-              type="button"
-              onClick={() => updateField('logoHeight', sz.size)}
-              className={`flex-1 py-1 rounded-lg text-[10px] font-bold transition-all ${
-                (config.logoHeight || 13) === sz.size
-                  ? 'bg-sky-500 text-white shadow-sm'
-                  : 'bg-slate-800 text-slate-400 hover:text-white'
-              }`}
-            >
-              {sz.label}
-            </button>
-          ))}
         </div>
       </div>
     </div>
