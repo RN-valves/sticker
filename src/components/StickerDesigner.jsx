@@ -220,14 +220,33 @@ export default function StickerDesigner({
             />
           </div>
 
-          <div>
-            <span className="text-[10px] text-slate-400 block mb-1">Default Finish</span>
+          <div className="col-span-2">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] text-slate-400 font-semibold">Default Color / Finish</span>
+              <span className="text-[10px] text-sky-400 font-mono">Dynamic per item</span>
+            </div>
             <input
               type="text"
               value={config.defaultFinish || 'Marble'}
               onChange={(e) => updateField('defaultFinish', e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-sky-500"
+              className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-sky-500 font-medium"
             />
+            <div className="flex flex-wrap gap-1 mt-1.5">
+              {['Marble', 'Rose Gold', 'Matte Black', 'Chrome Plated (CP)', 'Antique Brass', 'Gold Finish'].map((fin) => (
+                <button
+                  key={fin}
+                  type="button"
+                  onClick={() => updateField('defaultFinish', fin)}
+                  className={`text-[9.5px] px-2 py-0.5 rounded border transition-all ${
+                    (config.defaultFinish || 'Marble') === fin
+                      ? 'bg-sky-500 text-white border-sky-400 font-bold'
+                      : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                  }`}
+                >
+                  {fin}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div>

@@ -18,6 +18,7 @@ import {
   Printer,
   RotateCcw,
   Filter,
+  Palette,
 } from 'lucide-react';
 import { exportItemsToExcel } from '../utils/excelParser';
 import { INITIAL_SAMPLE_DATA } from '../utils/defaultPresets';
@@ -65,8 +66,12 @@ export default function DataTable({
         const q = searchQuery.toLowerCase();
         const matches =
           (item.articleNumber && item.articleNumber.toLowerCase().includes(q)) ||
+          (item.productName && item.productName.toLowerCase().includes(q)) ||
+          (item.finish && item.finish.toLowerCase().includes(q)) ||
+          (item.color && item.color.toLowerCase().includes(q)) ||
           (item.skuCode && item.skuCode.toLowerCase().includes(q)) ||
           (item.size && item.size.toLowerCase().includes(q)) ||
+          (item.collection && item.collection.toLowerCase().includes(q)) ||
           String(item.mrp).includes(q);
         if (!matches) return false;
       }
@@ -104,12 +109,14 @@ export default function DataTable({
   // Inline editing
   const startInlineEdit = (item) => {
     setEditingRowId(item.id);
-    setEditForm({ ...item });
+    setEditForm({ ...item, finish: item.color || item.finish || 'Marble' });
   };
 
   const saveInlineEdit = (id) => {
     onUpdateItem({
       ...editForm,
+      finish: editForm.finish || 'Marble',
+      color: editForm.finish || 'Marble',
       mrp: Number(editForm.mrp) || 0,
       quantity: Math.max(1, Number(editForm.quantity) || 1),
     });
@@ -310,11 +317,11 @@ export default function DataTable({
         </div>
 
         {/* Search */}
-        <div className="relative min-w-[200px]">
+        <div className="relative min-w-[220px]">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search Article, SKU, Size..."
+            placeholder="Search ART, Title, Color, Size, MRP..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none transition-colors"
@@ -344,6 +351,7 @@ export default function DataTable({
               <th className="p-3">Status</th>
               <th className="p-3">ART / Article</th>
               <th className="p-3">Product Title</th>
+              <th className="p-3">Color / Finish</th>
               <th className="p-3">MRP ({currencySymbol})</th>
               <th className="p-3">Qty</th>
               <th className="p-3">Size</th>
@@ -354,7 +362,7 @@ export default function DataTable({
           <tbody className="divide-y divide-slate-800/60">
             {filteredItems.length === 0 ? (
               <tr>
-                <td colSpan={9} className="p-8 text-center text-slate-400">
+                <td colSpan={11} className="p-8 text-center text-slate-400">
                   <div className="flex flex-col items-center justify-center space-y-3">
                     <AlertTriangle className="w-8 h-8 text-slate-600" />
                     <div>
@@ -383,6 +391,7 @@ export default function DataTable({
                 const isSelected = selectedIds.has(item.id);
                 const isEditing = editingRowId === item.id;
                 const status = item.printStatus || 'pending';
+                const itemFinish = item.color || item.finish || 'Marble';
 
                 if (isEditing) {
                   return (
@@ -416,10 +425,30 @@ export default function DataTable({
                       </td>
                       <td className="p-3">
                         <input
+                          type="text"
+                          value={editForm.productName}
+                          onChange={(e) =>
+                            setEditForm({ ...editForm, productName: e.target.value })
+                          }
+                          className="w-full bg-slate-900 border border-sky-500 rounded px-2 py-1 text-white text-xs focus:outline-none"
+                        />
+                      </td>
+                      <td className="p-3">
+                        <input
+                          type="text"
+                          value={editForm.finish}
+                          onChange={(e) =>
+                            setEditForm({ ...editForm, finish: e.target.value, color: e.target.value })
+                          }
+                          className="w-full bg-slate-900 border border-sky-500 rounded px-2 py-1 text-white text-xs focus:outline-none"
+                        />
+                      </td>
+                      <td className="p-3">
+                        <input
                           type="number"
                           value={editForm.mrp}
                           onChange={(e) => setEditForm({ ...editForm, mrp: e.target.value })}
-                          className="w-24 bg-slate-900 border border-sky-500 rounded px-2 py-1 text-white font-mono text-xs focus:outline-none"
+                          className="w-20 bg-slate-900 border border-sky-500 rounded px-2 py-1 text-white font-mono text-xs focus:outline-none"
                         />
                       </td>
                       <td className="p-3">
@@ -430,7 +459,7 @@ export default function DataTable({
                           onChange={(e) =>
                             setEditForm({ ...editForm, quantity: e.target.value })
                           }
-                          className="w-20 bg-slate-900 border border-sky-500 rounded px-2 py-1 text-white font-mono text-xs focus:outline-none"
+                          className="w-16 bg-slate-900 border border-sky-500 rounded px-2 py-1 text-white font-mono text-xs focus:outline-none"
                         />
                       </td>
                       <td className="p-3">
@@ -519,8 +548,13 @@ export default function DataTable({
                     <td className="p-3 font-semibold text-slate-100 font-mono">
                       <span>{item.articleNumber}</span>
                     </td>
-                    <td className="p-3 font-medium text-slate-200 text-[11px] truncate max-w-[160px]">
+                    <td className="p-3 font-medium text-slate-200 text-[11px] truncate max-w-[150px]">
                       {item.productName || item.description || 'Angle Cock with Flange'}
+                    </td>
+                    <td className="p-3">
+                      <span className="bg-sky-950/70 text-sky-300 border border-sky-800/50 text-[11px] font-semibold px-2 py-0.5 rounded-md truncate max-w-[130px] inline-block">
+                        {itemFinish}
+                      </span>
                     </td>
                     <td className="p-3 font-mono font-bold text-sky-400">
                       {currencySymbol} {typeof item.mrp === 'number' ? item.mrp.toLocaleString() : item.mrp}
@@ -531,11 +565,11 @@ export default function DataTable({
                       </span>
                     </td>
                     <td className="p-3">
-                      <span className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[11px] font-semibold border border-slate-700">
+                      <span className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[11px] font-semibold border border-slate-700 font-mono">
                         {item.size}
                       </span>
                     </td>
-                    <td className="p-3 font-mono text-slate-400 text-[11px] truncate max-w-[140px]">
+                    <td className="p-3 font-mono text-slate-400 text-[11px] truncate max-w-[130px]">
                       {item.skuCode || item.batchNo}
                     </td>
                     <td className="p-3 text-right">

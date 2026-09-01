@@ -12,9 +12,14 @@ export default function ColumnMapperModal({
 }) {
   const [mapping, setMapping] = useState({
     articleNumber: '',
+    productName: '',
     mrp: '',
     quantity: '',
     size: '',
+    finish: '',
+    collection: '',
+    batchNo: '',
+    mfgDate: '',
     skuCode: '',
   });
 
@@ -22,9 +27,14 @@ export default function ColumnMapperModal({
     if (isOpen) {
       setMapping({
         articleNumber: detectedMapping.articleNumber || '',
+        productName: detectedMapping.productName || '',
         mrp: detectedMapping.mrp || '',
         quantity: detectedMapping.quantity || '',
         size: detectedMapping.size || '',
+        finish: detectedMapping.finish || '',
+        collection: detectedMapping.collection || '',
+        batchNo: detectedMapping.batchNo || '',
+        mfgDate: detectedMapping.mfgDate || '',
         skuCode: detectedMapping.skuCode || '',
       });
     }
@@ -35,33 +45,63 @@ export default function ColumnMapperModal({
   const targetFields = [
     {
       key: 'articleNumber',
-      label: 'Article Number / Style No',
+      label: 'ART : (Article / Item Code)',
       required: true,
-      description: 'Product identifier, style code, or article number (e.g. ART-9021)',
+      description: 'Product identifier code (e.g. RNG2018B01, RN-BV-15)',
     },
     {
-      key: 'mrp',
-      label: 'MRP (Maximum Retail Price)',
-      required: true,
-      description: 'Product price number (e.g. 1499, ₹1,499.00)',
-    },
-    {
-      key: 'quantity',
-      label: 'Quantity (Print Copies)',
+      key: 'productName',
+      label: 'Product Title / Name',
       required: false,
-      description: 'Number of sticker labels to print for this row (defaults to 1 if blank)',
+      description: 'Main product title centered on sticker (e.g. Angle Cock with Flange, Ball Valve)',
+    },
+    {
+      key: 'finish',
+      label: 'Color / Finish (Dynamic)',
+      required: false,
+      description: 'Product color, finish, coating or shade (e.g. Marble, Rose Gold, Chrome Plated, Matte Black)',
     },
     {
       key: 'size',
-      label: 'Size / Dimension',
+      label: 'Size : (Valve / Pipe Size)',
       required: false,
-      description: 'Garment or item size (e.g. S, M, L, XL, 32, UK 9, Free Size)',
+      description: 'Size value (e.g. 15mm(1/2"), 20mm(3/4"), 25mm(1"), 1", 1/2", 3/4)',
+    },
+    {
+      key: 'mrp',
+      label: 'M.R.P : (Price ₹)',
+      required: true,
+      description: 'Product price in ₹ (e.g. 572, 850, 1150)',
+    },
+    {
+      key: 'quantity',
+      label: 'Quantity (Copies to Print)',
+      required: false,
+      description: 'Number of sticker labels to print for this item (default 1)',
+    },
+    {
+      key: 'collection',
+      label: 'Collection / Series Name',
+      required: false,
+      description: 'Series name on top-left (e.g. G20 Collection, Elite Series)',
+    },
+    {
+      key: 'batchNo',
+      label: 'Batch No. / Lot',
+      required: false,
+      description: 'Manufacturing batch / lot code (e.g. RPK06[AASK](02))',
+    },
+    {
+      key: 'mfgDate',
+      label: 'MFG Date',
+      required: false,
+      description: 'Manufacturing month & year (e.g. Jun 2026)',
     },
     {
       key: 'skuCode',
-      label: 'SKU Code / Barcode Data',
+      label: 'QR Code / Barcode Data',
       required: false,
-      description: 'Unique SKU code encoded into the barcode or QR code',
+      description: 'Alphanumeric hash or SKU encoded into the bottom-right QR code',
     },
   ];
 
@@ -75,9 +115,9 @@ export default function ColumnMapperModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fadeIn">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/60">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/60 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
               <Columns className="w-5 h-5" />
@@ -104,7 +144,7 @@ export default function ColumnMapperModal({
           <div className="bg-sky-950/40 border border-sky-800/40 rounded-xl p-3.5 flex items-start gap-3">
             <CheckCircle2 className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
             <p className="text-xs text-sky-200 leading-relaxed">
-              We automatically matched your spreadsheet headers. Verify or adjust the mappings below to match your Excel columns with the sticker fields.
+              We automatically matched your spreadsheet headers including <strong>Color / Finish</strong>. Verify or adjust the mappings below:
             </p>
           </div>
 
@@ -139,13 +179,13 @@ export default function ColumnMapperModal({
                       <p className="text-xs text-slate-400 mt-0.5">{field.description}</p>
                     </div>
 
-                    <div className="sm:w-56">
+                    <div className="sm:w-60">
                       <select
                         value={mapping[field.key]}
                         onChange={(e) => handleSelectChange(field.key, e.target.value)}
                         className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
                       >
-                        <option value="">-- Do Not Import / Auto --</option>
+                        <option value="">-- Auto Fallback --</option>
                         {headers.map((h) => (
                           <option key={h} value={h}>
                             Excel: {h}
@@ -161,7 +201,7 @@ export default function ColumnMapperModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-800 bg-slate-950/60">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-800 bg-slate-950/60 shrink-0">
           <button
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-xl transition-colors"

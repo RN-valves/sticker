@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, Edit3, X, Check } from 'lucide-react';
-import { EXACT_VALVE_SIZES } from '../utils/defaultPresets';
+import { PlusCircle, Edit3, X, Check, Palette } from 'lucide-react';
+import { EXACT_VALVE_SIZES, COMMON_FINISHES } from '../utils/defaultPresets';
 
 export default function AddItemModal({ isOpen, onClose, onSave, editingItem = null }) {
   const [formData, setFormData] = useState({
@@ -25,7 +25,7 @@ export default function AddItemModal({ isOpen, onClose, onSave, editingItem = nu
           articleNumber: editingItem.articleNumber || '',
           productName: editingItem.productName || 'Angle Cock with Flange',
           collection: editingItem.collection || 'G20 Collection',
-          finish: editingItem.finish || 'Marble',
+          finish: editingItem.color || editingItem.finish || 'Marble',
           mrp: editingItem.mrp || 572,
           quantity: editingItem.quantity || 1,
           size: editingItem.size || '15mm(1/2")',
@@ -85,6 +85,7 @@ export default function AddItemModal({ isOpen, onClose, onSave, editingItem = nu
       productName: formData.productName.trim() || 'Angle Cock with Flange',
       collection: formData.collection.trim() || 'G20 Collection',
       finish: formData.finish.trim() || 'Marble',
+      color: formData.finish.trim() || 'Marble',
       mrp: Number(formData.mrp),
       quantity: Number(formData.quantity),
       size: formData.size.trim() || '15mm(1/2")',
@@ -169,6 +170,41 @@ export default function AddItemModal({ isOpen, onClose, onSave, editingItem = nu
               />
             </div>
 
+            {/* Dynamic Color / Finish */}
+            <div className="space-y-1 sm:col-span-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-sky-400 flex items-center gap-1.5">
+                  <Palette className="w-3.5 h-3.5" />
+                  <span>Color / Finish (Dynamic on Sticker Line 2)</span>
+                </label>
+                <span className="text-[10px] text-slate-400">e.g. Marble, Rose Gold, CP, Black</span>
+              </div>
+              <input
+                type="text"
+                placeholder="e.g. Marble, Rose Gold, Chrome Plated (CP), Matte Black"
+                value={formData.finish}
+                onChange={(e) => handleChange('finish', e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 font-medium focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
+              />
+              {/* Quick Color / Finish Pills */}
+              <div className="flex flex-wrap gap-1.5 pt-1.5">
+                {COMMON_FINISHES.map((fin) => (
+                  <button
+                    key={fin}
+                    type="button"
+                    onClick={() => handleChange('finish', fin)}
+                    className={`text-[11px] px-2.5 py-0.5 rounded-lg border transition-all ${
+                      formData.finish === fin
+                        ? 'bg-sky-500 text-white border-sky-400 font-bold shadow-md shadow-sky-500/20'
+                        : 'bg-slate-800 text-slate-300 border-slate-700 hover:text-white hover:border-slate-600'
+                    }`}
+                  >
+                    {fin}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Size */}
             <div className="space-y-1 sm:col-span-2">
               <label className="text-xs font-semibold text-slate-300">
@@ -217,20 +253,6 @@ export default function AddItemModal({ isOpen, onClose, onSave, editingItem = nu
               />
             </div>
 
-            {/* Finish / Color */}
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300">
-                Finish / Material
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Marble, Chrome Plated, Brass"
-                value={formData.finish}
-                onChange={(e) => handleChange('finish', e.target.value)}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
-              />
-            </div>
-
             {/* Quantity */}
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-300">
@@ -275,7 +297,7 @@ export default function AddItemModal({ isOpen, onClose, onSave, editingItem = nu
             </div>
 
             {/* QR Code / Serial Hash */}
-            <div className="space-y-1">
+            <div className="space-y-1 sm:col-span-2">
               <label className="text-xs font-semibold text-slate-300">
                 QR Code / Serial Hash String
               </label>

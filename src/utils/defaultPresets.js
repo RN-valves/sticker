@@ -70,6 +70,20 @@ export const EXACT_VALVE_SIZES = [
 
 export const COMMON_VALVE_SIZES = EXACT_VALVE_SIZES;
 
+// Popular Valve & Faucet Finishes / Colors
+export const COMMON_FINISHES = [
+  'Marble',
+  'Rose Gold',
+  'Matte Black',
+  'Chrome Plated (CP)',
+  'Antique Brass',
+  'Gold Finish',
+  'Brass Natural',
+  'Graphite Grey',
+  'SS Satin',
+  'White',
+];
+
 export const INITIAL_SAMPLE_DATA = [
   {
     id: 'row-1',
@@ -77,6 +91,7 @@ export const INITIAL_SAMPLE_DATA = [
     productName: 'Angle Cock with Flange',
     collection: 'G20 Collection',
     finish: 'Marble',
+    color: 'Marble',
     mrp: 572,
     quantity: 1,
     size: '15mm(1/2")',
@@ -91,8 +106,9 @@ export const INITIAL_SAMPLE_DATA = [
     articleNumber: 'RNG2018B02',
     productName: 'Bib Cock Heavy with Wall Flange',
     collection: 'G20 Collection',
-    finish: 'Marble',
-    mrp: 645,
+    finish: 'Rose Gold',
+    color: 'Rose Gold',
+    mrp: 795,
     quantity: 2,
     size: '15mm (1/2")',
     batchNo: 'RPK06[BBSK](01)',
@@ -106,7 +122,8 @@ export const INITIAL_SAMPLE_DATA = [
     articleNumber: 'RNBV1025B01',
     productName: 'Brass Ball Valve Heavy Duty',
     collection: 'Elite Brass Collection',
-    finish: 'Brass Natural',
+    finish: 'Matte Black',
+    color: 'Matte Black',
     mrp: 1150,
     quantity: 4,
     size: '20mm (3/4")',
@@ -121,7 +138,8 @@ export const INITIAL_SAMPLE_DATA = [
     articleNumber: 'RNCV1032B01',
     productName: 'Concealed Stop Cock (Heavy)',
     collection: 'G20 Collection',
-    finish: 'Chrome Plated',
+    finish: 'Chrome Plated (CP)',
+    color: 'Chrome Plated (CP)',
     mrp: 890,
     quantity: 3,
     size: '20mm',
@@ -136,13 +154,30 @@ export const INITIAL_SAMPLE_DATA = [
     articleNumber: 'RNPC1015B01',
     productName: 'Pillar Cock High Neck',
     collection: 'G20 Collection',
-    finish: 'Marble',
-    mrp: 1280,
+    finish: 'Antique Brass',
+    color: 'Antique Brass',
+    mrp: 1480,
     quantity: 2,
     size: '15mm(1/2")',
     batchNo: 'RPK09[PCLK](02)',
     mfgDate: 'Jun 2026',
     skuCode: '3210e76adb2c8899',
+    printStatus: 'pending',
+    lastPrintedAt: null,
+  },
+  {
+    id: 'row-6',
+    articleNumber: 'RNSV1015B01',
+    productName: 'Sink Cock with Swivel Spout',
+    collection: 'G20 Collection',
+    finish: 'Gold Finish',
+    color: 'Gold Finish',
+    mrp: 1650,
+    quantity: 2,
+    size: '15mm (1/2")',
+    batchNo: 'RPK10[SCGV](01)',
+    mfgDate: 'Jun 2026',
+    skuCode: '1829f54bca1e7733',
     printStatus: 'pending',
     lastPrintedAt: null,
   },
@@ -156,9 +191,9 @@ export const DEFAULT_CONFIG = {
   unit: 'mm',
   layoutType: 'thermal', // 'thermal' | 'a4'
 
-  // Safe Margins / Padding (Generous Left Padding to prevent left edge cutting!)
-  paddingLeft: 6, // 6mm safe left margin
-  paddingRight: 4, // 4mm safe right margin
+  // Safe Margins / Padding
+  paddingLeft: 14, // 14mm safe left margin
+  paddingRight: 6, // 6mm safe right margin
   paddingTop: 3, // 3mm safe top margin
   paddingBottom: 2.5, // 2.5mm safe bottom margin
 

@@ -9,7 +9,13 @@ const SYNONYMS = {
   ],
   productName: [
     'product name', 'productname', 'item name', 'itemname', 'product', 'item description',
-    'description', 'title', 'product title', 'item title', 'product_name', 'name'
+    'description', 'title', 'product title', 'item title', 'product_name', 'name', 'item'
+  ],
+  finish: [
+    'finish', 'color', 'colour', 'colors', 'colours', 'finishes', 'finish type', 'finishtype',
+    'shade', 'surface', 'coating', 'material', 'item color', 'item colour', 'product color',
+    'product colour', 'color code', 'colour code', 'finish/color', 'color/finish', 'color / finish',
+    'finish / color', 'item finish', 'product finish'
   ],
   mrp: [
     'mrp', 'maximum retail price', 'retail price', 'retailprice', 'price', 'unit price',
@@ -24,9 +30,6 @@ const SYNONYMS = {
   ],
   collection: [
     'collection', 'collection name', 'series', 'brand line', 'range', 'group'
-  ],
-  finish: [
-    'finish', 'color', 'colour', 'coating', 'material', 'surface', 'shade'
   ],
   batchNo: [
     'batch no', 'batchno', 'batch_no', 'batch', 'lot', 'lot no', 'lotno', 'lot_no'
@@ -58,11 +61,11 @@ export function autoMapColumns(headers) {
   const mapping = {
     articleNumber: '',
     productName: '',
+    finish: '',
     mrp: '',
     quantity: '',
     size: '',
     collection: '',
-    finish: '',
     batchNo: '',
     mfgDate: '',
     skuCode: ''
@@ -153,7 +156,9 @@ export function transformRowsWithMapping(rawRows, mapping) {
       const mrp = mapping.mrp ? row[mapping.mrp] : '';
       const sku = mapping.skuCode ? row[mapping.skuCode] : '';
       const size = mapping.size ? row[mapping.size] : '';
-      return Boolean(art || mrp || sku || size);
+      const prod = mapping.productName ? row[mapping.productName] : '';
+      const finish = mapping.finish ? row[mapping.finish] : '';
+      return Boolean(art || mrp || sku || size || prod || finish);
     })
     .map((row, index) => {
       const artVal = mapping.articleNumber ? String(row[mapping.articleNumber] || '').trim() : '';
@@ -162,7 +167,18 @@ export function transformRowsWithMapping(rawRows, mapping) {
       const qtyRaw = mapping.quantity ? row[mapping.quantity] : 1;
       const sizeVal = mapping.size !== undefined && mapping.size !== '' ? String(row[mapping.size] !== undefined ? row[mapping.size] : '').trim() : '';
       const collectionVal = mapping.collection ? String(row[mapping.collection] || '').trim() : '';
-      const finishVal = mapping.finish ? String(row[mapping.finish] || '').trim() : '';
+      
+      // Dynamic Color / Finish handling with multiple fallback lookups
+      let finishVal = '';
+      if (mapping.finish && row[mapping.finish] !== undefined) {
+        finishVal = String(row[mapping.finish] || '').trim();
+      } else {
+        const altColorKey = Object.keys(row).find(k => /^(color|colour|finish|shade|material)/i.test(k.trim()));
+        if (altColorKey) {
+          finishVal = String(row[altColorKey] || '').trim();
+        }
+      }
+
       const batchVal = mapping.batchNo ? String(row[mapping.batchNo] || '').trim() : '';
       const mfgVal = mapping.mfgDate ? String(row[mapping.mfgDate] || '').trim() : '';
       const skuVal = mapping.skuCode ? String(row[mapping.skuCode] || '').trim() : '';
@@ -179,6 +195,7 @@ export function transformRowsWithMapping(rawRows, mapping) {
         productName: prodName || 'Angle Cock with Flange',
         collection: collectionVal || 'G20 Collection',
         finish: finishVal || 'Marble',
+        color: finishVal || 'Marble',
         mrp: isNaN(mrpNum) ? 572 : mrpNum,
         quantity: isNaN(qtyNum) ? 1 : qtyNum,
         size: sizeVal || '15mm(1/2")',
@@ -192,18 +209,18 @@ export function transformRowsWithMapping(rawRows, mapping) {
 }
 
 /**
- * Generates and downloads a sample Excel (.xlsx) file with RN Valves & Faucets official box data
+ * Generates and downloads a sample Excel (.xlsx) file with dynamic Color / Finish variations
  */
 export function downloadSampleExcel() {
   const sampleData = [
     {
       'ART': 'RNG2018B01',
       'Product Name': 'Angle Cock with Flange',
-      'Collection': 'G20 Collection',
+      'Color / Finish': 'Marble',
       'Size': '15mm(1/2")',
       'MRP': 572,
-      'Finish': 'Marble',
       'Quantity': 1,
+      'Collection': 'G20 Collection',
       'Batch No': 'RPK06[AASK](02)',
       'MFG Date': 'Jun 2026',
       'sku-code': '7646a28acb8c3349'
@@ -211,11 +228,11 @@ export function downloadSampleExcel() {
     {
       'ART': 'RNG2018B02',
       'Product Name': 'Bib Cock Heavy with Wall Flange',
-      'Collection': 'G20 Collection',
+      'Color / Finish': 'Rose Gold',
       'Size': '15mm (1/2")',
-      'MRP': 645,
-      'Finish': 'Marble',
+      'MRP': 795,
       'Quantity': 2,
+      'Collection': 'G20 Collection',
       'Batch No': 'RPK06[BBSK](01)',
       'MFG Date': 'Jun 2026',
       'sku-code': '8752b39bdf9d4451'
@@ -223,11 +240,11 @@ export function downloadSampleExcel() {
     {
       'ART': 'RNBV1025B01',
       'Product Name': 'Brass Ball Valve Heavy Duty',
-      'Collection': 'Elite Brass Collection',
+      'Color / Finish': 'Matte Black',
       'Size': '20mm (3/4")',
       'MRP': 1150,
-      'Finish': 'Brass Natural',
       'Quantity': 4,
+      'Collection': 'Elite Brass Collection',
       'Batch No': 'RPK07[BVHD](05)',
       'MFG Date': 'Jun 2026',
       'sku-code': '9120c48cfe1e5562'
@@ -235,11 +252,11 @@ export function downloadSampleExcel() {
     {
       'ART': 'RNCV1032B01',
       'Product Name': 'Concealed Stop Cock (Heavy)',
-      'Collection': 'G20 Collection',
+      'Color / Finish': 'Chrome Plated (CP)',
       'Size': '20mm',
       'MRP': 890,
-      'Finish': 'Chrome Plated',
       'Quantity': 3,
+      'Collection': 'G20 Collection',
       'Batch No': 'RPK08[CSCK](03)',
       'MFG Date': 'Jun 2026',
       'sku-code': '6543d21bca9a1122'
@@ -247,14 +264,26 @@ export function downloadSampleExcel() {
     {
       'ART': 'RNPC1015B01',
       'Product Name': 'Pillar Cock High Neck',
-      'Collection': 'G20 Collection',
+      'Color / Finish': 'Antique Brass',
       'Size': '15mm(1/2")',
-      'MRP': 1280,
-      'Finish': 'Marble',
+      'MRP': 1480,
       'Quantity': 2,
+      'Collection': 'G20 Collection',
       'Batch No': 'RPK09[PCLK](02)',
       'MFG Date': 'Jun 2026',
       'sku-code': '3210e76adb2c8899'
+    },
+    {
+      'ART': 'RNSV1015B01',
+      'Product Name': 'Sink Cock with Swivel Spout',
+      'Color / Finish': 'Gold Finish',
+      'Size': '15mm (1/2")',
+      'MRP': 1650,
+      'Quantity': 2,
+      'Collection': 'G20 Collection',
+      'Batch No': 'RPK10[SCGV](01)',
+      'MFG Date': 'Jun 2026',
+      'sku-code': '1829f54bca1e7733'
     }
   ];
 
@@ -265,11 +294,11 @@ export function downloadSampleExcel() {
   ws['!cols'] = [
     { wch: 16 }, // ART
     { wch: 32 }, // Product Name
-    { wch: 20 }, // Collection
+    { wch: 20 }, // Color / Finish
     { wch: 16 }, // Size
     { wch: 10 }, // MRP
-    { wch: 15 }, // Finish
     { wch: 10 }, // Quantity
+    { wch: 20 }, // Collection
     { wch: 20 }, // Batch No
     { wch: 14 }, // MFG Date
     { wch: 22 }, // sku-code
@@ -285,11 +314,11 @@ export function exportItemsToExcel(items, filename = 'rn_valves_stickers_export.
   const exportData = items.map(item => ({
     'ART': item.articleNumber,
     'Product Name': item.productName || 'Angle Cock with Flange',
-    'Collection': item.collection || 'G20 Collection',
+    'Color / Finish': item.color || item.finish || 'Marble',
     'Size': item.size,
     'MRP': item.mrp,
-    'Finish': item.finish || 'Marble',
     'Quantity': item.quantity,
+    'Collection': item.collection || 'G20 Collection',
     'Batch No': item.batchNo || item.skuCode || 'RPK06[AASK](02)',
     'MFG Date': item.mfgDate || 'Jun 2026',
     'sku-code': item.skuCode,

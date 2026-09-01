@@ -35,7 +35,10 @@ export default function StickerItem({
 
   // Field values with fallbacks
   const collectionName = item.collection || config.defaultCollection || 'G20 Collection';
-  const finishName = item.finish || config.defaultFinish || 'Marble';
+  // DYNAMIC COLOR / FINISH HANDLING
+  const finishName = String(item.color || item.finish || config.defaultFinish || 'Marble').trim();
+  const finishFontSize = finishName.length > 18 ? '6.8pt' : finishName.length > 12 ? '7.5pt' : '8pt';
+
   const mfgDate = item.mfgDate || config.defaultMfgDate || 'Jun 2026';
   const productName = item.productName || item.description || config.defaultProductName || 'Angle Cock with Flange';
   const batchNo = item.batchNo || item.skuCode || config.defaultBatchPrefix || 'RPK06[AASK](02)';
@@ -145,8 +148,12 @@ export default function StickerItem({
             <span className="font-black font-mono tracking-tight">{artNo}</span>
           </div>
 
-          {/* Finish / Material */}
-          <div className="font-bold text-black text-[8pt] truncate">
+          {/* Dynamic Color / Finish */}
+          <div
+            className="font-bold text-black tracking-tight truncate leading-tight"
+            style={{ fontSize: finishFontSize }}
+            title={finishName}
+          >
             {finishName}
           </div>
 
