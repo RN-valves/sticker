@@ -17,13 +17,26 @@ const SYNONYMS = {
     'product colour', 'color code', 'colour code', 'finish/color', 'color/finish', 'color / finish',
     'finish / color', 'item finish', 'product finish'
   ],
+  productQuantity: [
+    'product quantity', 'product qty', 'product_qty', 'box qty', 'box quantity', 'item qty',
+    'unit qty', 'pack qty', 'pack quantity', 'qty on label', 'label qty', 'pack size',
+    'pack of', 'packof', 'package size', 'pack_of', 'units', 'pieces', 'pcs', 'product_quantity'
+  ],
+  printQuantity: [
+    'print quantity', 'print qty', 'print_qty', 'sticker qty', 'stickers count', 'no of stickers',
+    'print count', 'copies', 'print copies', 'labels count', 'labels', 'sticker count', 'number of stickers',
+    'total stickers', 'print_count', 'copies count'
+  ],
+  packOf: [
+    'pack of', 'packof', 'pack_of', 'pack', 'package', 'package size', 'set of', 'setof',
+    'packaging', 'bundle', 'pack_type', 'packing', 'pack_count'
+  ],
   mrp: [
     'mrp', 'maximum retail price', 'retail price', 'retailprice', 'price', 'unit price',
     'rate', 'amount', 'selling price', 'sp', 'm.r.p', 'm.r.p.', 'cost'
   ],
   quantity: [
-    'quantity', 'qty', 'count', 'pieces', 'pcs', 'units', 'no of stickers',
-    'stickers count', 'sticker qty', 'print qty', 'print count', 'total'
+    'quantity', 'qty', 'count', 'print qty', 'no of stickers', 'print count', 'total', 'copies'
   ],
   size: [
     'size', 'dimension', 'valve size', 'item size', 'pipe size', 'diameter', 'sizes', 'measurement', 'fit'
@@ -62,6 +75,9 @@ export function autoMapColumns(headers) {
     articleNumber: '',
     productName: '',
     finish: '',
+    productQuantity: '',
+    printQuantity: '',
+    packOf: '',
     mrp: '',
     quantity: '',
     size: '',
@@ -164,11 +180,10 @@ export function transformRowsWithMapping(rawRows, mapping) {
       const artVal = mapping.articleNumber ? String(row[mapping.articleNumber] || '').trim() : '';
       const prodName = mapping.productName ? String(row[mapping.productName] || '').trim() : '';
       const mrpRaw = mapping.mrp ? row[mapping.mrp] : '';
-      const qtyRaw = mapping.quantity ? row[mapping.quantity] : 1;
       const sizeVal = mapping.size !== undefined && mapping.size !== '' ? String(row[mapping.size] !== undefined ? row[mapping.size] : '').trim() : '';
       const collectionVal = mapping.collection ? String(row[mapping.collection] || '').trim() : '';
       
-      // Dynamic Color / Finish handling with multiple fallback lookups
+      // Dynamic Color / Finish handling
       let finishVal = '';
       if (mapping.finish && row[mapping.finish] !== undefined) {
         finishVal = String(row[mapping.finish] || '').trim();
@@ -179,15 +194,41 @@ export function transformRowsWithMapping(rawRows, mapping) {
         }
       }
 
+      // Dynamic Pack of / Product Qty handling (Physical quantity printed on the sticker!)
+      let prodQtyVal = '';
+      if (mapping.productQuantity && row[mapping.productQuantity] !== undefined) {
+        prodQtyVal = String(row[mapping.productQuantity] || '').trim();
+      } else if (mapping.packOf && row[mapping.packOf] !== undefined) {
+        prodQtyVal = String(row[mapping.packOf] || '').trim();
+      } else {
+        const altProdQtyKey = Object.keys(row).find(k => /^(product qty|product quantity|box qty|item qty|unit qty|pack of|pack size)/i.test(k.trim()));
+        if (altProdQtyKey) {
+          prodQtyVal = String(row[altProdQtyKey] || '').trim();
+        }
+      }
+
+      // Print Copies (How many physical stickers to print!)
+      let printCopiesVal = 1;
+      if (mapping.printQuantity && row[mapping.printQuantity] !== undefined) {
+        const parsed = parseInt(String(row[mapping.printQuantity]).replace(/[^0-9]/g, ''), 10);
+        if (!isNaN(parsed) && parsed > 0) printCopiesVal = parsed;
+      } else if (mapping.quantity && row[mapping.quantity] !== undefined && !mapping.productQuantity) {
+        // If only generic quantity column was mapped and not productQuantity
+        const parsed = parseInt(String(row[mapping.quantity]).replace(/[^0-9]/g, ''), 10);
+        if (!isNaN(parsed) && parsed > 0) printCopiesVal = parsed;
+      }
+
+      // Fallback: If prodQtyVal is empty, default to '1' or 'Pack of 1'
+      if (!prodQtyVal) {
+        prodQtyVal = '1';
+      }
+
       const batchVal = mapping.batchNo ? String(row[mapping.batchNo] || '').trim() : '';
       const mfgVal = mapping.mfgDate ? String(row[mapping.mfgDate] || '').trim() : '';
       const skuVal = mapping.skuCode ? String(row[mapping.skuCode] || '').trim() : '';
 
       const mrpClean = String(mrpRaw).replace(/[^0-9.]/g, '');
       const mrpNum = mrpClean ? parseFloat(mrpClean) : 0;
-
-      const qtyClean = String(qtyRaw).replace(/[^0-9]/g, '');
-      const qtyNum = qtyClean ? Math.max(1, parseInt(qtyClean, 10)) : 1;
 
       return {
         id: `imported-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 5)}`,
@@ -196,8 +237,11 @@ export function transformRowsWithMapping(rawRows, mapping) {
         collection: collectionVal || 'G20 Collection',
         finish: finishVal || 'Marble',
         color: finishVal || 'Marble',
+        productQuantity: prodQtyVal, // Printed on sticker: e.g. "1", "Pack of 2", "Pack of 3", "1 N"
+        packOf: prodQtyVal,
+        quantity: printCopiesVal, // Number of sticker copies to print!
+        printQuantity: printCopiesVal,
         mrp: isNaN(mrpNum) ? 572 : mrpNum,
-        quantity: isNaN(qtyNum) ? 1 : qtyNum,
         size: sizeVal || '15mm(1/2")',
         batchNo: batchVal || skuVal || `RPK06[AASK](${String(index + 1).padStart(2, '0')})`,
         mfgDate: mfgVal || 'Jun 2026',
@@ -209,7 +253,7 @@ export function transformRowsWithMapping(rawRows, mapping) {
 }
 
 /**
- * Generates and downloads a sample Excel (.xlsx) file with dynamic Color / Finish variations
+ * Generates and downloads a sample Excel (.xlsx) file with separate Product Qty and Print Copies
  */
 export function downloadSampleExcel() {
   const sampleData = [
@@ -217,9 +261,10 @@ export function downloadSampleExcel() {
       'ART': 'RNG2018B01',
       'Product Name': 'Angle Cock with Flange',
       'Color / Finish': 'Marble',
+      'Product Qty (On Sticker)': '1 N',
+      'Print Copies (Stickers Count)': 25,
       'Size': '15mm(1/2")',
       'MRP': 572,
-      'Quantity': 1,
       'Collection': 'G20 Collection',
       'Batch No': 'RPK06[AASK](02)',
       'MFG Date': 'Jun 2026',
@@ -229,9 +274,10 @@ export function downloadSampleExcel() {
       'ART': 'RNG2018B02',
       'Product Name': 'Bib Cock Heavy with Wall Flange',
       'Color / Finish': 'Rose Gold',
+      'Product Qty (On Sticker)': 'Pack of 2',
+      'Print Copies (Stickers Count)': 50,
       'Size': '15mm (1/2")',
       'MRP': 795,
-      'Quantity': 2,
       'Collection': 'G20 Collection',
       'Batch No': 'RPK06[BBSK](01)',
       'MFG Date': 'Jun 2026',
@@ -241,9 +287,10 @@ export function downloadSampleExcel() {
       'ART': 'RNBV1025B01',
       'Product Name': 'Brass Ball Valve Heavy Duty',
       'Color / Finish': 'Matte Black',
+      'Product Qty (On Sticker)': 'Pack of 3',
+      'Print Copies (Stickers Count)': 40,
       'Size': '20mm (3/4")',
       'MRP': 1150,
-      'Quantity': 4,
       'Collection': 'Elite Brass Collection',
       'Batch No': 'RPK07[BVHD](05)',
       'MFG Date': 'Jun 2026',
@@ -253,9 +300,10 @@ export function downloadSampleExcel() {
       'ART': 'RNCV1032B01',
       'Product Name': 'Concealed Stop Cock (Heavy)',
       'Color / Finish': 'Chrome Plated (CP)',
+      'Product Qty (On Sticker)': 'Pack of 2',
+      'Print Copies (Stickers Count)': 30,
       'Size': '20mm',
       'MRP': 890,
-      'Quantity': 3,
       'Collection': 'G20 Collection',
       'Batch No': 'RPK08[CSCK](03)',
       'MFG Date': 'Jun 2026',
@@ -265,9 +313,10 @@ export function downloadSampleExcel() {
       'ART': 'RNPC1015B01',
       'Product Name': 'Pillar Cock High Neck',
       'Color / Finish': 'Antique Brass',
+      'Product Qty (On Sticker)': '1 N',
+      'Print Copies (Stickers Count)': 20,
       'Size': '15mm(1/2")',
       'MRP': 1480,
-      'Quantity': 2,
       'Collection': 'G20 Collection',
       'Batch No': 'RPK09[PCLK](02)',
       'MFG Date': 'Jun 2026',
@@ -277,9 +326,10 @@ export function downloadSampleExcel() {
       'ART': 'RNSV1015B01',
       'Product Name': 'Sink Cock with Swivel Spout',
       'Color / Finish': 'Gold Finish',
+      'Product Qty (On Sticker)': 'Pack of 4',
+      'Print Copies (Stickers Count)': 15,
       'Size': '15mm (1/2")',
       'MRP': 1650,
-      'Quantity': 2,
       'Collection': 'G20 Collection',
       'Batch No': 'RPK10[SCGV](01)',
       'MFG Date': 'Jun 2026',
@@ -295,9 +345,10 @@ export function downloadSampleExcel() {
     { wch: 16 }, // ART
     { wch: 32 }, // Product Name
     { wch: 20 }, // Color / Finish
+    { wch: 24 }, // Product Qty (On Sticker)
+    { wch: 28 }, // Print Copies (Stickers Count)
     { wch: 16 }, // Size
     { wch: 10 }, // MRP
-    { wch: 10 }, // Quantity
     { wch: 20 }, // Collection
     { wch: 20 }, // Batch No
     { wch: 14 }, // MFG Date
@@ -315,9 +366,10 @@ export function exportItemsToExcel(items, filename = 'rn_valves_stickers_export.
     'ART': item.articleNumber,
     'Product Name': item.productName || 'Angle Cock with Flange',
     'Color / Finish': item.color || item.finish || 'Marble',
+    'Product Qty (On Sticker)': item.productQuantity || item.packOf || '1',
+    'Print Copies (Stickers Count)': item.quantity || item.printQuantity || 1,
     'Size': item.size,
     'MRP': item.mrp,
-    'Quantity': item.quantity,
     'Collection': item.collection || 'G20 Collection',
     'Batch No': item.batchNo || item.skuCode || 'RPK06[AASK](02)',
     'MFG Date': item.mfgDate || 'Jun 2026',

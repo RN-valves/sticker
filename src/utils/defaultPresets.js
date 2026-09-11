@@ -84,6 +84,17 @@ export const COMMON_FINISHES = [
   'White',
 ];
 
+// Popular Pack of Sizes
+export const COMMON_PACK_SIZES = [
+  'Pack of 1',
+  'Pack of 2',
+  'Pack of 3',
+  'Pack of 4',
+  'Pack of 6',
+  'Pack of 10',
+  'Pack of 12',
+];
+
 export const INITIAL_SAMPLE_DATA = [
   {
     id: 'row-1',
@@ -94,6 +105,7 @@ export const INITIAL_SAMPLE_DATA = [
     color: 'Marble',
     mrp: 572,
     quantity: 1,
+    packOf: 'Pack of 1',
     size: '15mm(1/2")',
     batchNo: 'RPK06[AASK](02)',
     mfgDate: 'Jun 2026',
@@ -110,6 +122,7 @@ export const INITIAL_SAMPLE_DATA = [
     color: 'Rose Gold',
     mrp: 795,
     quantity: 2,
+    packOf: 'Pack of 2',
     size: '15mm (1/2")',
     batchNo: 'RPK06[BBSK](01)',
     mfgDate: 'Jun 2026',
@@ -126,6 +139,7 @@ export const INITIAL_SAMPLE_DATA = [
     color: 'Matte Black',
     mrp: 1150,
     quantity: 4,
+    packOf: 'Pack of 3',
     size: '20mm (3/4")',
     batchNo: 'RPK07[BVHD](05)',
     mfgDate: 'Jun 2026',
@@ -142,6 +156,7 @@ export const INITIAL_SAMPLE_DATA = [
     color: 'Chrome Plated (CP)',
     mrp: 890,
     quantity: 3,
+    packOf: 'Pack of 2',
     size: '20mm',
     batchNo: 'RPK08[CSCK](03)',
     mfgDate: 'Jun 2026',
@@ -158,6 +173,7 @@ export const INITIAL_SAMPLE_DATA = [
     color: 'Antique Brass',
     mrp: 1480,
     quantity: 2,
+    packOf: 'Pack of 1',
     size: '15mm(1/2")',
     batchNo: 'RPK09[PCLK](02)',
     mfgDate: 'Jun 2026',
@@ -174,6 +190,7 @@ export const INITIAL_SAMPLE_DATA = [
     color: 'Gold Finish',
     mrp: 1650,
     quantity: 2,
+    packOf: 'Pack of 2',
     size: '15mm (1/2")',
     batchNo: 'RPK10[SCGV](01)',
     mfgDate: 'Jun 2026',
@@ -200,6 +217,7 @@ export const DEFAULT_CONFIG = {
   // Default Global Fallbacks
   defaultCollection: 'G20 Collection',
   defaultFinish: 'Marble',
+  defaultPackOf: 'Pack of 1',
   defaultMfgDate: 'Jun 2026',
   defaultProductName: 'Angle Cock with Flange',
   defaultBatchPrefix: 'RPK06[AASK](02)',
@@ -237,6 +255,9 @@ export const DEFAULT_CONFIG = {
 
   showQty: true,
   qtyLabel: 'Qty :',
+
+  showPackOf: true,
+  packOfLabel: 'Pack of :',
 
   showBatchNo: true,
   batchLabel: 'Batch No. :',

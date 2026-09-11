@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, Edit3, X, Check, Palette } from 'lucide-react';
-import { EXACT_VALVE_SIZES, COMMON_FINISHES } from '../utils/defaultPresets';
+import { PlusCircle, Edit3, X, Check, Palette, Package, Printer } from 'lucide-react';
+import { EXACT_VALVE_SIZES, COMMON_FINISHES, COMMON_PACK_SIZES } from '../utils/defaultPresets';
 
 export default function AddItemModal({ isOpen, onClose, onSave, editingItem = null }) {
   const [formData, setFormData] = useState({
@@ -8,9 +8,10 @@ export default function AddItemModal({ isOpen, onClose, onSave, editingItem = nu
     productName: 'Angle Cock with Flange',
     collection: 'G20 Collection',
     finish: 'Marble',
-    mrp: 572,
-    quantity: 1,
+    productQuantity: '1',
+    quantity: 1, // Print Copies
     size: '15mm(1/2")',
+    mrp: 572,
     batchNo: 'RPK06[AASK](02)',
     mfgDate: 'Jun 2026',
     skuCode: '7646a28acb8c3349',
@@ -26,9 +27,10 @@ export default function AddItemModal({ isOpen, onClose, onSave, editingItem = nu
           productName: editingItem.productName || 'Angle Cock with Flange',
           collection: editingItem.collection || 'G20 Collection',
           finish: editingItem.color || editingItem.finish || 'Marble',
-          mrp: editingItem.mrp || 572,
-          quantity: editingItem.quantity || 1,
+          productQuantity: editingItem.productQuantity || editingItem.packOf || '1',
+          quantity: editingItem.quantity || editingItem.printQuantity || 1,
           size: editingItem.size || '15mm(1/2")',
+          mrp: editingItem.mrp || 572,
           batchNo: editingItem.batchNo || 'RPK06[AASK](02)',
           mfgDate: editingItem.mfgDate || 'Jun 2026',
           skuCode: editingItem.skuCode || '7646a28acb8c3349',
@@ -39,9 +41,10 @@ export default function AddItemModal({ isOpen, onClose, onSave, editingItem = nu
           productName: 'Angle Cock with Flange',
           collection: 'G20 Collection',
           finish: 'Marble',
-          mrp: 572,
+          productQuantity: '1',
           quantity: 1,
           size: '15mm(1/2")',
+          mrp: 572,
           batchNo: 'RPK06[AASK](02)',
           mfgDate: 'Jun 2026',
           skuCode: '7646a28acb8c3349',
@@ -71,7 +74,7 @@ export default function AddItemModal({ isOpen, onClose, onSave, editingItem = nu
       newErrors.mrp = 'Please enter a valid MRP price';
     }
     if (!formData.quantity || isNaN(Number(formData.quantity)) || Number(formData.quantity) < 1) {
-      newErrors.quantity = 'Quantity must be at least 1';
+      newErrors.quantity = 'Print copies count must be at least 1';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -86,8 +89,11 @@ export default function AddItemModal({ isOpen, onClose, onSave, editingItem = nu
       collection: formData.collection.trim() || 'G20 Collection',
       finish: formData.finish.trim() || 'Marble',
       color: formData.finish.trim() || 'Marble',
+      productQuantity: formData.productQuantity.trim() || '1',
+      packOf: formData.productQuantity.trim() || '1',
+      quantity: Number(formData.quantity) || 1, // Sticker Print Copies
+      printQuantity: Number(formData.quantity) || 1,
       mrp: Number(formData.mrp),
-      quantity: Number(formData.quantity),
       size: formData.size.trim() || '15mm(1/2")',
       batchNo: formData.batchNo.trim() || 'RPK06[AASK](02)',
       mfgDate: formData.mfgDate.trim() || 'Jun 2026',
@@ -175,7 +181,7 @@ export default function AddItemModal({ isOpen, onClose, onSave, editingItem = nu
               <div className="flex items-center justify-between">
                 <label className="text-xs font-semibold text-sky-400 flex items-center gap-1.5">
                   <Palette className="w-3.5 h-3.5" />
-                  <span>Color / Finish (Dynamic on Sticker Line 2)</span>
+                  <span>Color / Finish</span>
                 </label>
                 <span className="text-[10px] text-slate-400">e.g. Marble, Rose Gold, CP, Black</span>
               </div>
@@ -203,6 +209,80 @@ export default function AddItemModal({ isOpen, onClose, onSave, editingItem = nu
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Product / Box Quantity (PRINTED ON THE STICKER) */}
+            <div className="space-y-1 sm:col-span-2 bg-amber-950/20 border border-amber-800/40 p-3 rounded-xl">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                  <Package className="w-4 h-4 text-amber-400" />
+                  <span>Product Qty Printed ON Sticker (e.g. 1, Pack of 2, Pack of 3)</span>
+                </label>
+                <span className="text-[10px] text-amber-400 font-mono">Prints on Qty line</span>
+              </div>
+              <input
+                type="text"
+                placeholder="e.g. 1, 1 N, Pack of 2, Pack of 3, 2 Pcs"
+                value={formData.productQuantity}
+                onChange={(e) => handleChange('productQuantity', e.target.value)}
+                className="w-full bg-slate-950 border border-amber-500/40 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 font-bold focus:outline-none focus:border-amber-400 transition-colors"
+              />
+              {/* Quick Pills */}
+              <div className="flex flex-wrap gap-1.5 pt-2">
+                {['1', '1 N', 'Pack of 2', 'Pack of 3', 'Pack of 4', 'Pack of 6', 'Pack of 10'].map((pk) => (
+                  <button
+                    key={pk}
+                    type="button"
+                    onClick={() => handleChange('productQuantity', pk)}
+                    className={`text-[11px] px-2.5 py-0.5 rounded-lg border transition-all ${
+                      formData.productQuantity === pk
+                        ? 'bg-amber-500 text-slate-950 border-amber-400 font-black shadow-md'
+                        : 'bg-slate-900 text-slate-300 border-slate-700 hover:text-white'
+                    }`}
+                  >
+                    {pk}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Print Copies (HOW MANY LABELS TO PRINT) */}
+            <div className="space-y-1 sm:col-span-2 bg-sky-950/20 border border-sky-800/40 p-3 rounded-xl">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-sky-300 flex items-center gap-1.5">
+                  <Printer className="w-4 h-4 text-sky-400" />
+                  <span>Sticker Print Copies (Number of physical stickers to print)</span>
+                </label>
+                <span className="text-[10px] text-sky-400 font-mono">Total Feed Count</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min="1"
+                  placeholder="1"
+                  value={formData.quantity}
+                  onChange={(e) => handleChange('quantity', e.target.value)}
+                  className="w-full bg-slate-950 border border-sky-500/40 rounded-lg px-3 py-2 text-sm text-white font-mono font-bold focus:outline-none focus:border-sky-400 transition-colors"
+                />
+                {/* Quick Count Steppers */}
+                <div className="flex items-center gap-1 shrink-0">
+                  {[1, 5, 10, 25, 50, 100].map((cnt) => (
+                    <button
+                      key={cnt}
+                      type="button"
+                      onClick={() => handleChange('quantity', cnt)}
+                      className={`text-[10px] px-2 py-1.5 rounded-lg border font-mono font-bold transition-all ${
+                        Number(formData.quantity) === cnt
+                          ? 'bg-sky-500 text-white border-sky-400 shadow-md'
+                          : 'bg-slate-900 text-slate-400 border-slate-700 hover:text-white'
+                      }`}
+                    >
+                      {cnt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {errors.quantity && <p className="text-[11px] text-rose-400 mt-1">{errors.quantity}</p>}
             </div>
 
             {/* Size */}
@@ -253,21 +333,6 @@ export default function AddItemModal({ isOpen, onClose, onSave, editingItem = nu
               />
             </div>
 
-            {/* Quantity */}
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300">
-                Qty (Copies) <span className="text-rose-400">*</span>
-              </label>
-              <input
-                type="number"
-                min="1"
-                placeholder="1"
-                value={formData.quantity}
-                onChange={(e) => handleChange('quantity', e.target.value)}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
-              />
-            </div>
-
             {/* MFG Date */}
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-300">
@@ -283,7 +348,7 @@ export default function AddItemModal({ isOpen, onClose, onSave, editingItem = nu
             </div>
 
             {/* Batch No */}
-            <div className="space-y-1">
+            <div className="space-y-1 sm:col-span-2">
               <label className="text-xs font-semibold text-slate-300">
                 Batch No.
               </label>

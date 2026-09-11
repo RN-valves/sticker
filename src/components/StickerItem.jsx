@@ -15,6 +15,7 @@ export default function StickerItem({
     unit = 'mm',
     defaultCollection = 'G20 Collection',
     defaultFinish = 'Marble',
+    defaultProductQty = '1',
     defaultMfgDate = 'Jun 2026',
     defaultProductName = 'Angle Cock with Flange',
     defaultBatchPrefix = 'RPK06[AASK](02)',
@@ -35,9 +36,26 @@ export default function StickerItem({
 
   // Field values with fallbacks
   const collectionName = item.collection || config.defaultCollection || 'G20 Collection';
+  
   // DYNAMIC COLOR / FINISH HANDLING
   const finishName = String(item.color || item.finish || config.defaultFinish || 'Marble').trim();
   const finishFontSize = finishName.length > 18 ? '6.8pt' : finishName.length > 12 ? '7.5pt' : '8pt';
+
+  // PRODUCT QUANTITY PRINTED ON THE STICKER (Independent of sticker print copies!)
+  // e.g. "1", "1 N", "Pack of 2", "Pack of 3", "2 Pcs"
+  const rawProductQty = String(
+    item.productQuantity !== undefined && item.productQuantity !== ''
+      ? item.productQuantity
+      : (item.packOf !== undefined && item.packOf !== ''
+          ? item.packOf
+          : (config.defaultProductQty || '1'))
+  ).trim();
+
+  let formattedQtyDisplay = rawProductQty;
+  if (/^\d+$/.test(rawProductQty)) {
+    // If user passed just a single digit like 1 or 2, display it cleanly
+    formattedQtyDisplay = rawProductQty;
+  }
 
   const mfgDate = item.mfgDate || config.defaultMfgDate || 'Jun 2026';
   const productName = item.productName || item.description || config.defaultProductName || 'Angle Cock with Flange';
@@ -45,7 +63,6 @@ export default function StickerItem({
   const artNo = item.articleNumber || 'RNG2018B01';
   const sizeVal = String(item.size !== undefined && item.size !== '' ? item.size : '15mm(1/2")').trim();
   const mrpVal = item.mrp !== undefined && item.mrp !== '' ? item.mrp : 572;
-  const qtyVal = item.quantity || 1;
   const qrData = item.skuCode || item.articleNumber || '7646a28acb8c3349';
 
   // Render QR Code or Barcode
@@ -157,10 +174,10 @@ export default function StickerItem({
             {finishName}
           </div>
 
-          {/* Quantity */}
+          {/* Product Quantity Printed on Sticker (e.g. 1, 1 N, Pack of 2, Pack of 3) */}
           <div className="flex items-baseline gap-1 text-[8pt] text-black">
             <span className="font-bold shrink-0">Qty :</span>
-            <span className="font-bold font-mono">{qtyVal}</span>
+            <span className="font-bold font-mono tracking-tight">{formattedQtyDisplay}</span>
           </div>
 
           {/* MFG Date */}

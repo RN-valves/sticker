@@ -19,6 +19,7 @@ import {
   RotateCcw,
   Filter,
   Palette,
+  Package,
 } from 'lucide-react';
 import { exportItemsToExcel } from '../utils/excelParser';
 import { INITIAL_SAMPLE_DATA } from '../utils/defaultPresets';
@@ -69,6 +70,8 @@ export default function DataTable({
           (item.productName && item.productName.toLowerCase().includes(q)) ||
           (item.finish && item.finish.toLowerCase().includes(q)) ||
           (item.color && item.color.toLowerCase().includes(q)) ||
+          (item.productQuantity && String(item.productQuantity).toLowerCase().includes(q)) ||
+          (item.packOf && String(item.packOf).toLowerCase().includes(q)) ||
           (item.skuCode && item.skuCode.toLowerCase().includes(q)) ||
           (item.size && item.size.toLowerCase().includes(q)) ||
           (item.collection && item.collection.toLowerCase().includes(q)) ||
@@ -80,9 +83,9 @@ export default function DataTable({
     });
   }, [items, searchQuery, statusFilter]);
 
-  // Statistics
+  // Statistics: Total physical stickers to print
   const totalStickerCopies = useMemo(() => {
-    return filteredItems.reduce((acc, curr) => acc + (Number(curr.quantity) || 1), 0);
+    return filteredItems.reduce((acc, curr) => acc + (Number(curr.quantity || curr.printQuantity) || 1), 0);
   }, [filteredItems]);
 
   // Selection handlers
@@ -109,7 +112,12 @@ export default function DataTable({
   // Inline editing
   const startInlineEdit = (item) => {
     setEditingRowId(item.id);
-    setEditForm({ ...item, finish: item.color || item.finish || 'Marble' });
+    setEditForm({
+      ...item,
+      finish: item.color || item.finish || 'Marble',
+      productQuantity: item.productQuantity || item.packOf || '1',
+      quantity: item.quantity || item.printQuantity || 1,
+    });
   };
 
   const saveInlineEdit = (id) => {
@@ -117,8 +125,11 @@ export default function DataTable({
       ...editForm,
       finish: editForm.finish || 'Marble',
       color: editForm.finish || 'Marble',
-      mrp: Number(editForm.mrp) || 0,
+      productQuantity: editForm.productQuantity || '1',
+      packOf: editForm.productQuantity || '1',
       quantity: Math.max(1, Number(editForm.quantity) || 1),
+      printQuantity: Math.max(1, Number(editForm.quantity) || 1),
+      mrp: Number(editForm.mrp) || 0,
     });
     setEditingRowId(null);
   };
@@ -171,10 +182,10 @@ export default function DataTable({
                 {items.length} styles
               </span>
               <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs px-2 py-0.5 rounded-full font-semibold">
-                {totalStickerCopies} stickers in view
+                {totalStickerCopies} print labels
               </span>
             </div>
-            <p className="text-xs text-slate-400">Track printing success/failure status and manage Excel rows</p>
+            <p className="text-xs text-slate-400">Product Qty is printed on sticker; Print Copies is how many labels to print</p>
           </div>
         </div>
 
@@ -321,7 +332,7 @@ export default function DataTable({
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search ART, Title, Color, Size, MRP..."
+            placeholder="Search ART, Title, Color, Pack, Size..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none transition-colors"
@@ -352,8 +363,9 @@ export default function DataTable({
               <th className="p-3">ART / Article</th>
               <th className="p-3">Product Title</th>
               <th className="p-3">Color / Finish</th>
+              <th className="p-3">Box Qty (On Sticker)</th>
+              <th className="p-3">Print Copies</th>
               <th className="p-3">MRP ({currencySymbol})</th>
-              <th className="p-3">Qty</th>
               <th className="p-3">Size</th>
               <th className="p-3">Batch / Hash Code</th>
               <th className="p-3 text-right">Actions</th>
@@ -362,7 +374,7 @@ export default function DataTable({
           <tbody className="divide-y divide-slate-800/60">
             {filteredItems.length === 0 ? (
               <tr>
-                <td colSpan={11} className="p-8 text-center text-slate-400">
+                <td colSpan={12} className="p-8 text-center text-slate-400">
                   <div className="flex flex-col items-center justify-center space-y-3">
                     <AlertTriangle className="w-8 h-8 text-slate-600" />
                     <div>
@@ -392,6 +404,8 @@ export default function DataTable({
                 const isEditing = editingRowId === item.id;
                 const status = item.printStatus || 'pending';
                 const itemFinish = item.color || item.finish || 'Marble';
+                const itemProdQty = item.productQuantity || item.packOf || '1';
+                const itemCopies = item.quantity || item.printQuantity || 1;
 
                 if (isEditing) {
                   return (
@@ -445,10 +459,13 @@ export default function DataTable({
                       </td>
                       <td className="p-3">
                         <input
-                          type="number"
-                          value={editForm.mrp}
-                          onChange={(e) => setEditForm({ ...editForm, mrp: e.target.value })}
-                          className="w-20 bg-slate-900 border border-sky-500 rounded px-2 py-1 text-white font-mono text-xs focus:outline-none"
+                          type="text"
+                          value={editForm.productQuantity}
+                          onChange={(e) =>
+                            setEditForm({ ...editForm, productQuantity: e.target.value, packOf: e.target.value })
+                          }
+                          placeholder="e.g. 1, Pack of 2"
+                          className="w-24 bg-slate-900 border border-amber-500 rounded px-2 py-1 text-white text-xs font-bold focus:outline-none"
                         />
                       </td>
                       <td className="p-3">
@@ -457,9 +474,17 @@ export default function DataTable({
                           min="1"
                           value={editForm.quantity}
                           onChange={(e) =>
-                            setEditForm({ ...editForm, quantity: e.target.value })
+                            setEditForm({ ...editForm, quantity: e.target.value, printQuantity: e.target.value })
                           }
-                          className="w-16 bg-slate-900 border border-sky-500 rounded px-2 py-1 text-white font-mono text-xs focus:outline-none"
+                          className="w-16 bg-slate-900 border border-sky-500 rounded px-2 py-1 text-white font-mono text-xs focus:outline-none font-bold"
+                        />
+                      </td>
+                      <td className="p-3">
+                        <input
+                          type="number"
+                          value={editForm.mrp}
+                          onChange={(e) => setEditForm({ ...editForm, mrp: e.target.value })}
+                          className="w-20 bg-slate-900 border border-sky-500 rounded px-2 py-1 text-white font-mono text-xs focus:outline-none"
                         />
                       </td>
                       <td className="p-3">
@@ -548,28 +573,35 @@ export default function DataTable({
                     <td className="p-3 font-semibold text-slate-100 font-mono">
                       <span>{item.articleNumber}</span>
                     </td>
-                    <td className="p-3 font-medium text-slate-200 text-[11px] truncate max-w-[150px]">
+                    <td className="p-3 font-medium text-slate-200 text-[11px] truncate max-w-[140px]">
                       {item.productName || item.description || 'Angle Cock with Flange'}
                     </td>
                     <td className="p-3">
-                      <span className="bg-sky-950/70 text-sky-300 border border-sky-800/50 text-[11px] font-semibold px-2 py-0.5 rounded-md truncate max-w-[130px] inline-block">
+                      <span className="bg-sky-950/70 text-sky-300 border border-sky-800/50 text-[11px] font-semibold px-2 py-0.5 rounded-md truncate max-w-[120px] inline-block">
                         {itemFinish}
+                      </span>
+                    </td>
+                    {/* Box Qty (Printed ON the sticker) */}
+                    <td className="p-3">
+                      <span className="bg-amber-950/70 text-amber-300 border border-amber-800/50 text-[11px] font-bold px-2 py-0.5 rounded-md truncate max-w-[110px] inline-block">
+                        {itemProdQty}
+                      </span>
+                    </td>
+                    {/* Print Copies (Sticker Count) */}
+                    <td className="p-3">
+                      <span className="bg-slate-800 text-sky-400 font-mono px-2 py-0.5 rounded border border-slate-700 font-bold">
+                        {itemCopies} labels
                       </span>
                     </td>
                     <td className="p-3 font-mono font-bold text-sky-400">
                       {currencySymbol} {typeof item.mrp === 'number' ? item.mrp.toLocaleString() : item.mrp}
                     </td>
                     <td className="p-3">
-                      <span className="bg-slate-800 text-slate-200 font-mono px-2 py-0.5 rounded border border-slate-700 font-bold">
-                        {item.quantity}
-                      </span>
-                    </td>
-                    <td className="p-3">
                       <span className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[11px] font-semibold border border-slate-700 font-mono">
                         {item.size}
                       </span>
                     </td>
-                    <td className="p-3 font-mono text-slate-400 text-[11px] truncate max-w-[130px]">
+                    <td className="p-3 font-mono text-slate-400 text-[11px] truncate max-w-[120px]">
                       {item.skuCode || item.batchNo}
                     </td>
                     <td className="p-3 text-right">

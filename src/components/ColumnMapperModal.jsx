@@ -13,10 +13,11 @@ export default function ColumnMapperModal({
   const [mapping, setMapping] = useState({
     articleNumber: '',
     productName: '',
-    mrp: '',
-    quantity: '',
-    size: '',
     finish: '',
+    productQuantity: '',
+    printQuantity: '',
+    size: '',
+    mrp: '',
     collection: '',
     batchNo: '',
     mfgDate: '',
@@ -28,10 +29,11 @@ export default function ColumnMapperModal({
       setMapping({
         articleNumber: detectedMapping.articleNumber || '',
         productName: detectedMapping.productName || '',
-        mrp: detectedMapping.mrp || '',
-        quantity: detectedMapping.quantity || '',
-        size: detectedMapping.size || '',
         finish: detectedMapping.finish || '',
+        productQuantity: detectedMapping.productQuantity || detectedMapping.packOf || '',
+        printQuantity: detectedMapping.printQuantity || detectedMapping.quantity || '',
+        size: detectedMapping.size || '',
+        mrp: detectedMapping.mrp || '',
         collection: detectedMapping.collection || '',
         batchNo: detectedMapping.batchNo || '',
         mfgDate: detectedMapping.mfgDate || '',
@@ -59,7 +61,19 @@ export default function ColumnMapperModal({
       key: 'finish',
       label: 'Color / Finish (Dynamic)',
       required: false,
-      description: 'Product color, finish, coating or shade (e.g. Marble, Rose Gold, Chrome Plated, Matte Black)',
+      description: 'Product color or coating (e.g. Marble, Rose Gold, Chrome Plated, Matte Black)',
+    },
+    {
+      key: 'productQuantity',
+      label: 'Product Qty (Printed ON Sticker)',
+      required: false,
+      description: 'What quantity is inside 1 box (e.g. 1, 1 N, Pack of 2, Pack of 3, 2 Pcs) - Prints on the sticker',
+    },
+    {
+      key: 'printQuantity',
+      label: 'Print Copies (Sticker Labels to Print)',
+      required: false,
+      description: 'How many physical sticker labels to print for this item (e.g. 25, 50, 100 copies)',
     },
     {
       key: 'size',
@@ -72,12 +86,6 @@ export default function ColumnMapperModal({
       label: 'M.R.P : (Price ₹)',
       required: true,
       description: 'Product price in ₹ (e.g. 572, 850, 1150)',
-    },
-    {
-      key: 'quantity',
-      label: 'Quantity (Copies to Print)',
-      required: false,
-      description: 'Number of sticker labels to print for this item (default 1)',
     },
     {
       key: 'collection',
@@ -144,7 +152,7 @@ export default function ColumnMapperModal({
           <div className="bg-sky-950/40 border border-sky-800/40 rounded-xl p-3.5 flex items-start gap-3">
             <CheckCircle2 className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
             <p className="text-xs text-sky-200 leading-relaxed">
-              We automatically matched your spreadsheet headers including <strong>Color / Finish</strong>. Verify or adjust the mappings below:
+              We separate <strong>Product Qty (Printed on Sticker)</strong> from <strong>Print Copies (Labels to print)</strong> so your stickers always display the exact product pack size.
             </p>
           </div>
 
